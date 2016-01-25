@@ -1,2 +1,2 @@
-# COMP932 
+# COMP392
 Boiler Plate for THreeJs
