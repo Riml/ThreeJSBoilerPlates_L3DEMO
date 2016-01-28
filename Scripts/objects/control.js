@@ -4,7 +4,8 @@ var objects;
     // CONTROL CLASS ++++++++++++++++++++++++++++++++++++++++++
     var Control = (function () {
         // CONSTRUCTOR ++++++++++++++++++++++++++++++++++++++++
-        function Control(mesh) {
+        function Control(rotationSpeed) {
+            this.rotationSpeed = rotationSpeed;
         }
         return Control;
     })();

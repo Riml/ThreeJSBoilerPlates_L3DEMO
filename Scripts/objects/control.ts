@@ -4,10 +4,10 @@ module objects {
     // CONTROL CLASS ++++++++++++++++++++++++++++++++++++++++++
     export class Control { 
         //PUBLIC INSTANCE VARIABLES +++++++++++++++++++++++++++
-        public points: objects.Point[];
-        public mesh: Object3D;
+        public rotationSpeed:number;
         // CONSTRUCTOR ++++++++++++++++++++++++++++++++++++++++
-        constructor(mesh: Object3D) {
+        constructor(rotationSpeed:number) {
+            this.rotationSpeed = rotationSpeed;
         }
        //PUBLIC METHODS +++++++++++++++++++++++++++++++++++++++
     }
