@@ -11,6 +11,7 @@ var SphereGeometry = THREE.SphereGeometry;
 var Geometry = THREE.Geometry;
 var AxisHelper = THREE.AxisHelper;
 var LambertMaterial = THREE.MeshLambertMaterial;
+var Texture = THREE.Texture;
 var MeshBasicMaterial = THREE.MeshBasicMaterial;
 var Material = THREE.Material;
 var Mesh = THREE.Mesh;
@@ -34,6 +35,7 @@ var axes;
 var cubes;
 var plane;
 var sphere;
+var texture;
 var ambientLight;
 var spotLight;
 var control;
@@ -54,6 +56,7 @@ function init() {
     axes = new AxisHelper(10);
     scene.add(axes);
     console.log("Added Axis Helper to scene...");
+    texture = THREE.ImageUtils.loadTexture('Content/Textures/wood.jpg');
     //Add a Plane to the Scene
     plane = new gameObject(new PlaneGeometry(16, 16, 1, 1), new LambertMaterial({ color: 0xE79B61 }), 0, 0, 0);
     plane.rotation.x = -0.5 * Math.PI;
@@ -68,7 +71,7 @@ function init() {
     //right leg
     createBodyPart(-1, 0, 0, 0.31, 0.72, 0.21, 0);
     createBodyPart(-1, -0.5, 1.55, 0.2, 0.2, 1.25, 0);
-    createBodyPart(-0.75, -0.5, 4.18, 0.2, 0.2, 1.25, 0);
+    createBodyPart(-1, -0.5, 4.18, 0.2, 0.2, 1.25, 0);
     //left hand
     createBodyPart(2, -0.4, 9.2, 0.2, 0.2, 1, 40.5);
     //hand rotation
@@ -116,7 +119,7 @@ function init() {
     window.addEventListener('resize', onResize, false);
 }
 function createBodyPart(x, z, y, h, d, w, z_rotation) {
-    cubeMaterial = new LambertMaterial({ color: 0x00ff00 });
+    cubeMaterial = new LambertMaterial({ map: texture });
     cubeGeometry = new CubeGeometry(h * 1.75, w * 1.75, d * 1.75);
     var thisCube = new Mesh(cubeGeometry, cubeMaterial);
     thisCube.position.set(x, y, z);
@@ -124,7 +127,7 @@ function createBodyPart(x, z, y, h, d, w, z_rotation) {
     cubes.push(thisCube);
 }
 function createNonstaticBodyPart(x, z, y, h, d, w, z_rotation) {
-    cubeMaterial = new LambertMaterial({ color: 0x00ff00 });
+    cubeMaterial = new LambertMaterial({ map: texture });
     cubeGeometry = new CubeGeometry(h * 1.75, w * 1.75, d * 1.75);
     var thisCube = new Mesh(cubeGeometry, cubeMaterial);
     thisCube.position.set(x, y, z);
