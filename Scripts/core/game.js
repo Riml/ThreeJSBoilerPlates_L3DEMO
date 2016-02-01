@@ -12,6 +12,7 @@ var Geometry = THREE.Geometry;
 var AxisHelper = THREE.AxisHelper;
 var LambertMaterial = THREE.MeshLambertMaterial;
 var Texture = THREE.Texture;
+var PhongMaterial = THREE.MeshPhongMaterial;
 var MeshBasicMaterial = THREE.MeshBasicMaterial;
 var Material = THREE.Material;
 var Mesh = THREE.Mesh;
@@ -42,6 +43,7 @@ var control;
 var gui;
 var stats;
 var pivot;
+var cubeMan;
 var step = 0;
 var cubeGeometry;
 var cubeMaterial;
@@ -58,12 +60,13 @@ function init() {
     console.log("Added Axis Helper to scene...");
     texture = THREE.ImageUtils.loadTexture('Content/Textures/wood.jpg');
     //Add a Plane to the Scene
-    plane = new gameObject(new PlaneGeometry(16, 16, 1, 1), new LambertMaterial({ color: 0xE79B61 }), 0, 0, 0);
+    plane = new gameObject(new PlaneGeometry(24, 24, 1, 1), new LambertMaterial({ color: 0xE79B61 }), 0, 0, 0);
     plane.rotation.x = -0.5 * Math.PI;
+    plane.receiveShadow = true;
     scene.add(plane);
     console.log("Added Plane Primitive to scene...");
     //cube-man creation
-    cubes = [];
+    cubeMan = new THREE.Object3D();
     //left leg
     createBodyPart(1, 0, 0, 0.31, 0.72, 0.21, 0);
     createBodyPart(1, -0.5, 1.55, 0.2, 0.2, 1.25, 0);
@@ -81,7 +84,7 @@ function init() {
     createNonstaticBodyPart(0.05, -0.45, 2.5, 0.1, 0.09, 0.2, -37.5);
     pivot.position.set(2.83, 10.12, -0.59);
     rotationDirection = 1;
-    scene.add(pivot);
+    cubeMan.add(pivot);
     //righ hand
     createBodyPart(-3.3, -0.46, 4.5, 0.2, 0.2, 0.38, 0);
     createBodyPart(-3, -0.4, 6, 0.2, 0.2, 1, 13.6);
@@ -90,21 +93,22 @@ function init() {
     createBodyPart(0, -0.3, 7.1, 1.077, 0.417, 1.757, 0);
     createBodyPart(0.0, -0.5, 8.7, 0.2, 0.2, 1, 0);
     createBodyPart(-0.1, -0.35, 10, 0.7, 0.7, 0.7, 0);
-    cubes.forEach(function (element) {
-        element.castShadow = true;
-        element.receiveShadow = true;
-        scene.add(element);
-    });
+    scene.add(cubeMan);
     // Add an AmbientLight to the scene
-    ambientLight = new AmbientLight(0x090909);
-    scene.add(ambientLight);
-    console.log("Added an Ambient Light to Scene");
+    //ambientLight = new AmbientLight(0x090909);
+    //scene.add(ambientLight);
+    //console.log("Added an Ambient Light to Scene");
     // Add a SpotLight to the scene
     spotLight = new SpotLight(0xffffff);
-    spotLight.position.set(5.6, 23.1, 5.4);
-    spotLight.rotation.set(-0.8, 42.7, 119.5);
+    spotLight.position.set(4, 30, 12);
+    spotLight.rotation.set(0, 0, 0);
     spotLight.intensity = 2;
     spotLight.castShadow = true;
+    spotLight.shadowMapWidth = 1024;
+    spotLight.shadowMapHeight = 1024;
+    spotLight.shadowDarkness = 0.5;
+    spotLight.shadowCameraFar = 1000;
+    spotLight.shadowCameraNear = 0.1;
     scene.add(spotLight);
     console.log("Added a SpotLight Light to Scene");
     // add controls
@@ -119,19 +123,23 @@ function init() {
     window.addEventListener('resize', onResize, false);
 }
 function createBodyPart(x, z, y, h, d, w, z_rotation) {
-    cubeMaterial = new LambertMaterial({ map: texture });
+    cubeMaterial = new PhongMaterial({ map: texture });
     cubeGeometry = new CubeGeometry(h * 1.75, w * 1.75, d * 1.75);
     var thisCube = new Mesh(cubeGeometry, cubeMaterial);
     thisCube.position.set(x, y, z);
     thisCube.rotation.z = -z_rotation / 180 * Math.PI;
-    cubes.push(thisCube);
+    thisCube.castShadow = true;
+    thisCube.receiveShadow = true;
+    cubeMan.add(thisCube);
 }
 function createNonstaticBodyPart(x, z, y, h, d, w, z_rotation) {
-    cubeMaterial = new LambertMaterial({ map: texture });
+    cubeMaterial = new PhongMaterial({ map: texture });
     cubeGeometry = new CubeGeometry(h * 1.75, w * 1.75, d * 1.75);
     var thisCube = new Mesh(cubeGeometry, cubeMaterial);
     thisCube.position.set(x, y, z);
     thisCube.rotation.z = -z_rotation / 180 * Math.PI;
+    thisCube.castShadow = true;
+    thisCube.receiveShadow = true;
     pivot.add(thisCube);
 }
 function onResize() {
@@ -168,13 +176,14 @@ function setupRenderer() {
     renderer = new Renderer();
     renderer.setClearColor(0xEEEEEE, 1.0);
     renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.shadowMapEnabled = true;
     renderer.shadowMap.enabled = true;
     console.log("Finished setting up Renderer...");
 }
 // Setup main camera for the scene
 function setupCamera() {
     // camera = new PerspectiveCamera(45, myScreenConf.ration, 0.1, 1000);
-    camera = new PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera = new PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
     camera.position.x = 8.7;
     camera.position.y = 20.47; //z
     camera.position.z = 20.9; //y axis in blender
