@@ -1,7 +1,10 @@
 /// <reference path="_reference.ts"/>
 
 // MAIN GAME FILE
-
+/* Ilmir Taychinovs study project for Advanced Graphic course
+centennial college W2016
+last modified: Feb 5,2016
+*/
 // THREEJS Aliases
 import Scene = THREE.Scene;
 import Renderer = THREE.WebGLRenderer;
@@ -46,93 +49,103 @@ var spotLight: SpotLight;
 var control: Control;
 var gui: GUI;
 var stats: Stats;
-var pivot: Object3D;
-var cubeMan: Object3D;
+var cubeHand: Object3D;
+var cubeBody: Object3D;
+var cubeMan: Object3D
 var step: number = 0;
 var cubeGeometry:CubeGeometry;
-var cubeMaterial:PhongMaterial;
+var cubeMaterial:LambertMaterial;
 var rotationDirection :number;
+var myColor:Color;
+var cubeColors:Color;
+var planeTestMaterial: LambertMaterial;
+
 function init() {
     // Instantiate a new Scene object
     scene = new Scene();
-    //cubes = new Mesh[16];
-
     setupRenderer(); // setup the default renderer
-	
-    setupCamera(); // setup the camera
+	setupCamera(); // setup the camera
 	
     // add an axis helper to the scene
     axes = new AxisHelper(10);
     scene.add(axes);
     console.log("Added Axis Helper to scene...");
     texture= THREE.ImageUtils.loadTexture('Content/Textures/wood.jpg');
+   
     //Add a Plane to the Scene
-    plane = new gameObject(
-        new PlaneGeometry(24, 24, 1, 1),
-        new LambertMaterial({ color: 0xE79B61 }),
-        0, 0, 0);
-
+    myColor=new Color(0xFACEEE);
+    planeTestMaterial = new LambertMaterial({ color: String(myColor) })
+    plane = new gameObject(new PlaneGeometry(24, 24, 1, 1),planeTestMaterial,0, 0, 0);
     plane.rotation.x = -0.5 * Math.PI;
     plane.receiveShadow = true;
     scene.add(plane);
     console.log("Added Plane Primitive to scene...");
     
      
-    //cube-man creation
-    cubeMan = new THREE.Object3D();
+    //Humanoid creation
+    cubeMan = new Object3D();
+    cubeBody =  new  Object3D();
+    cubeHand= new Object3D();
+    
+    cubeMaterial= new LambertMaterial({color: String(myColor),map:texture});
+  
     //left leg
-    createBodyPart(1,0,0,0.31,0.72,0.21,0);
-    createBodyPart(1,-0.5,1.55,0.2,0.2,1.25,0);
-    createBodyPart(0.8,-0.5,4.2,0.2,0.2,1.25,-8);
+    addBodyPart(1,0,0,0.31,0.72,0.21,0,cubeBody);
+    addBodyPart(1,-0.5,1.55,0.2,0.2,1.25,0,cubeBody);
+    addBodyPart(0.8,-0.5,4.2,0.2,0.2,1.25,-8,cubeBody);
     //right leg
-    createBodyPart(-1,0,0,0.31,0.72,0.21,0);
-    createBodyPart(-1,-0.5,1.55,0.2,0.2,1.25,0);
-    createBodyPart(-1,-0.5,4.18,0.2,0.2,1.25,0);
+    addBodyPart(-1,0,0,0.31,0.72,0.21,0,cubeBody);
+    addBodyPart(-1,-0.5,1.55,0.2,0.2,1.25,0,cubeBody);
+    addBodyPart(-1,-0.5,4.18,0.2,0.2,1.25,0,cubeBody);
     //left hand
-    createBodyPart(2,-0.4,9.2,0.2,0.2,1,40.5);
+    addBodyPart(2,-0.4,9.2,0.2,0.2,1,40.5,cubeBody);
     //hand rotation
-    pivot = new THREE.Object3D();
-    createNonstaticBodyPart(0.29,-0.34,0.97,0.2,0.2,1,13.6);
-    createNonstaticBodyPart(0.79,-0.45,2.6,0.26,0.08,0.52,26.5);
-    createNonstaticBodyPart(0.05,-0.45,2.5,0.1,0.09,0.2,-37.5);
-    pivot.position.set(2.83,10.12,-0.59);
+    
+    addBodyPart(0.29,-0.34,0.97,0.2,0.2,1,13.6,cubeHand);
+    addBodyPart(0.79,-0.45,2.6,0.26,0.08,0.52,26.5,cubeHand);
+    addBodyPart(0.05,-0.45,2.5,0.1,0.09,0.2,-37.5,cubeHand);
+    cubeHand.position.set(2.83,10.12,0);
     rotationDirection=1;
-    cubeMan.add(pivot);
+    
     //righ hand
-    createBodyPart(-3.3,-0.46,4.5,0.2,0.2,0.38,0);
-    createBodyPart(-3,-0.4,6,0.2,0.2,1,13.6);
-    createBodyPart(-2.1,-0.4,8,0.2,0.2,1,40.5);
+    addBodyPart(-3.3,-0.46,4.5,0.2,0.2,0.38,0,cubeBody);
+    addBodyPart(-3,-0.4,6,0.2,0.2,1,13.6,cubeBody);
+    addBodyPart(-2.1,-0.4,8,0.2,0.2,1,40.5,cubeBody);
     //body, neck, head
-    createBodyPart(0,-0.3,7.1,1.077,0.417,1.757,0);
-    createBodyPart(0.0,-0.5,8.7,0.2,0.2,1,0);
-    createBodyPart(-0.1,-0.35,10,0.7,0.7,0.7,0);
+    addBodyPart(0,-0.3,7.1,1.077,0.417,1.757,0,cubeBody);
+    addBodyPart(0.0,-0.5,8.7,0.2,0.2,1,0,cubeBody);
+    addBodyPart(-0.1,-0.35,10,0.7,0.7,0.7,0,cubeBody);
+    
+    cubeMan.add(cubeHand);
+    cubeMan.add(cubeBody);
     
     scene.add(cubeMan);
-       
     
+    // Add Lights to the scene
+   
     
-    // Add an AmbientLight to the scene
-    //ambientLight = new AmbientLight(0x090909);
-    //scene.add(ambientLight);
-    //console.log("Added an Ambient Light to Scene");
-	
-    // Add a SpotLight to the scene
     spotLight = new SpotLight(0xffffff);
-    spotLight.position.set(4, 30, 12);
+    spotLight.position.set(14, 40, 12);
     spotLight.rotation.set(0,0,0);
-    spotLight.intensity=2;
+    //spotLight.intensity=0.2;
     spotLight.castShadow = true;
-    spotLight.shadowMapWidth = 1024;
-    spotLight.shadowMapHeight = 1024;
-    spotLight.shadowDarkness = 0.5;
+    //make shadows more neat an a bit brighter
+    //spotLight.shadowMapWidth = 1024;
+    //spotLight.shadowMapHeight = 1024;
+    //spotLight.shadowDarkness = 0.5;
     spotLight.shadowCameraFar=1000;
     spotLight.shadowCameraNear=0.1;
     scene.add(spotLight);
-    console.log("Added a SpotLight Light to Scene");
+     
+    ambientLight = new AmbientLight(0x949494);
+    scene.add(ambientLight);
+    
+    console.log("Added a AmbientLight and SpotLight Light to Scene");
     
     // add controls
     gui = new GUI();
-    control= new Control(0.01);
+   
+    control= new Control(0.001,0.00001,"#FACEEE");
     addControl(control);
 
     // Add framerate stats
@@ -145,27 +158,18 @@ function init() {
     window.addEventListener('resize', onResize, false);
 }
 
-function createBodyPart(x:number,z:number,y:number,h:number,d:number,w:number,z_rotation:number):void{
-    cubeMaterial= new PhongMaterial({map:texture});
+function addBodyPart(x:number,z:number,y:number,h:number,d:number,w:number,z_rotation:number,attachTo:Object3D):void{
+    
     cubeGeometry = new CubeGeometry(h*1.75,w*1.75,d*1.75);
     var thisCube:Mesh = new Mesh(cubeGeometry,cubeMaterial);
     thisCube.position.set(x,y,z);
     thisCube.rotation.z=-z_rotation /180 * Math.PI;
     thisCube.castShadow = true;
-    thisCube.receiveShadow = true;
-    cubeMan.add(thisCube);
+    //thisCube.receiveShadow = true;
+  
+    attachTo.add(thisCube);
  }
- 
- function createNonstaticBodyPart(x:number,z:number,y:number,h:number,d:number,w:number,z_rotation:number):void{
-    cubeMaterial= new PhongMaterial({map:texture});
-    cubeGeometry = new CubeGeometry(h*1.75,w*1.75,d*1.75);
-    var thisCube:Mesh = new Mesh(cubeGeometry,cubeMaterial);
-    thisCube.position.set(x,y,z);
-    thisCube.rotation.z=-z_rotation /180 * Math.PI;
-    thisCube.castShadow = true;
-    thisCube.receiveShadow = true;
-    pivot.add( thisCube );
-}
+
 
 function onResize(): void {
     camera.aspect = window.innerWidth / window.innerHeight;
@@ -174,7 +178,11 @@ function onResize(): void {
 }
 
 function addControl(controlObject: Control): void {
-    gui.add(controlObject, 'rotationSpeed',-0.25,0.25);
+    gui.add(controlObject, 'handRotationSpeed',-0.25,0.25);
+    gui.add(controlObject, 'xRotationSpeed',-0.25,0.25);
+    gui.add(controlObject, 'yRotationSpeed',-0.25,0.25);
+    gui.add(controlObject, 'zRotationSpeed',-0.25,0.25);
+    gui.addColor(controlObject, 'newColor');
 }
 
 function addStatsObject() {
@@ -190,11 +198,18 @@ function addStatsObject() {
 function gameLoop(): void {
     stats.update();
     
-    pivot.rotation.z+=rotationDirection*control.rotationSpeed;;
-    if(Math.abs(pivot.rotation.z) > 45/180 * Math.PI){
+    cubeHand.rotation.z+=rotationDirection*control.handRotationSpeed;;
+    if(Math.abs(cubeHand.rotation.z) > 45/180 * Math.PI){
        rotationDirection=-rotationDirection;
      }
-     
+     cubeMan.rotation.x+=control.xRotationSpeed;
+     cubeMan.rotation.y+=control.yRotationSpeed;
+     cubeMan.rotation.z+=control.zRotationSpeed;
+    
+    //console.log(planeTestMaterial.color.getHexString());
+    //console.log(control.newColor);
+    planeTestMaterial.color.setStyle(control.newColor);
+   
     
     // render using requestAnimationFrame
     requestAnimationFrame(gameLoop);
@@ -208,7 +223,7 @@ function setupRenderer(): void {
     renderer = new Renderer();
     renderer.setClearColor(0xEEEEEE, 1.0);
     renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.shadowMapEnabled = true;
+    //renderer.shadowMapEnabled = true;
     renderer.shadowMap.enabled=true;
     console.log("Finished setting up Renderer...")
 }
